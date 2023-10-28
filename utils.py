@@ -189,6 +189,15 @@ def running_all_instance_with_chosen_capacity(
 ):
     final_results = []
 
+    try:
+        pdf_capacidades = pd.read_excel(constants.CAPACIDADES_PATH, engine="openpyxl")
+        caps = pd.pivot_table(
+            pdf_capacidades, index=["Instance", "nmaquinas"], aggfunc={"capacity": "mean"}
+        ).T.to_dict()
+    except:
+        print("Não foi encontrado arquivo de capacidades. Seguindo com dados default do Trigeiro.")
+        caps = {}
+        
     if not MPI_BOOL:
         for dataset in constants.INSTANCES:
             for nmaq in constants.MAQUINAS:
@@ -196,6 +205,7 @@ def running_all_instance_with_chosen_capacity(
                     dataset,
                     build_model,                    
                     nmaquinas=nmaq,
+                    capacity=caps.get((dataset, nmaq), {}).get("capacity", 0),
                     env_formulation=env_formulation,
                 )
 
