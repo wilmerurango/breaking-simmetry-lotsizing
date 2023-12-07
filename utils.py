@@ -25,11 +25,14 @@ import gc
 def print_info(context: ProjectContext, data: dataCS, status: str) -> None:
     if MPI_BOOL:
         comm = MPI.COMM_WORLD
-        rank = comm.Get_rank()
+        rank = comm.Get_rank()          
+        size = comm.Get_size()
+        name = MPI.Get_processor_name()
+        message = f"Process {rank} / {size} on {name}"        
     else:
-        rank = None
+        message = None
     print(
-        f"Instance = {data.instance} Cap = {data.cap[0]} nmaquinas = {data.r} {status} Experimento {context.experiment_id}"
+        f"Instance = {data.instance} Cap = {data.cap[0]} nmaquinas = {data.r} {status} Experimento {context.experiment_id} " + message
     )
 
 
