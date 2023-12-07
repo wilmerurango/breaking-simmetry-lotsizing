@@ -2,7 +2,7 @@ from pathlib import Path
 
 INSTANCES = [f"F{i}.DAT" for i in range(1, 71)] + [f"G{i}.DAT" for i in range(1, 76)]
 MAQUINAS = [2,4,6]
-NUM_POINTS = 20
+NUM_POINTS = 10
 FAST_TIMELIMIT = 20
 TIMELIMIT = 3600
 
