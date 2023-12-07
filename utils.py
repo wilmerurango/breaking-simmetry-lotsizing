@@ -30,7 +30,7 @@ def print_info(context: ProjectContext, data: dataCS, status: str) -> None:
         name = MPI.Get_processor_name()
         message = f"Process {rank} / {size} on {name}"        
     else:
-        message = None
+        message = str(None)
     print(
         f"Instance = {data.instance} Cap = {data.cap[0]} nmaquinas = {data.r} {status} Experimento {context.experiment_id} " + message
     )
