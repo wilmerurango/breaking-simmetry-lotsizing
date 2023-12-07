@@ -71,7 +71,7 @@ def choose_capacity(
 
     for cap in np.linspace(
         original_capacity,
-        original_capacity * 2,
+        original_capacity * data.r * 2,
         num=constants.NUM_POINTS,
         endpoint=True,
     ):
@@ -95,7 +95,7 @@ def choose_capacity(
             df_ideal_capacity = pd.DataFrame(
                 [closest_to_IDEAL_CAPACITY_percent(instance_results)]
             )
-            data.cap[0] = df_ideal_capacity["capacity"]
+            data.cap[0] = int(df_ideal_capacity["capacity"].values[0])
             df_ideal_capacity.to_excel(
                 f"{constants.RESULTADOS_INDIVIDUAIS_PATH}/{str(data)}.xlsx",
                 engine="openpyxl",

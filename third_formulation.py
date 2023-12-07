@@ -154,7 +154,7 @@ def constraint_simetria_do_crossover(mdl: Model, data: dataCS) -> Model:
     )
     return mdl
 
-def constraint_simetria_do_máquinas_SBC3(mdl: Model, data: dataCS) -> Model:    
+def constraint_simetria_de_máquinas_SBC3(mdl: Model, data: dataCS) -> Model:    
     for j in range(1,data.r):
         for t in range(data.nperiodos):
             mdl.add_constraints(mdl.y[0,j-1,t] >= mdl.y[0,j,t]
@@ -221,6 +221,8 @@ def build_model(data: dataCS, capacity: float) -> Model:
     mdl = constraint_tempo_emprestado_crossover(mdl, data)
     mdl = constraint_proibe_crossover_sem_setup(mdl, data)
     mdl = constraint_setup_max_um_item(mdl, data)
+    mdl = constraint_simetria_do_crossover(mdl, data)
+    mdl = constraint_simetria_de_máquinas_SBC3(mdl, data)
 
     mdl.add_kpi(total_setup_cost(mdl, data), "total_setup_cost")
     mdl.add_kpi(total_estoque_cost(mdl, data), "total_estoque_cost")
