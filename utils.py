@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 from read_file import dataCS
 from context import ProjectContext
+from docplex.mp.relax_linear import LinearRelaxer
 
 try:
     from mpi4py.futures import MPIPoolExecutor
@@ -186,7 +187,7 @@ def solve_optimized_model(
     kpis = add_new_kpi(kpis, result, data, formulation=env_formulation, experimento=context.experiment_id)
 
     # Cálculo da relaxação linear
-    relaxed_model = mdl.clone()
+    relaxed_model = LinearRelaxer.make_relaxed_model(mdl.clone())
     status = relaxed_model.solve(url=None, key=None, log_output=False)
 
     relaxed_objective_value = relaxed_model.objective_value
