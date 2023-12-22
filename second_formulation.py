@@ -28,9 +28,18 @@ def create_variables(mdl: Model, data: dataCS) -> Model:
         ub=1,
         name=f"v",
     )
+    mdl.z = mdl.binary_var_dict(
+        ((j, t) for j in range(data.r) for t in range(data.nperiodos)),
+        lb=0,
+        ub=1,
+        name=f"z",
+    )  # existe ou não crossover na máquina j no período t
     mdl.u = mdl.continuous_var_dict(
         ((j, t) for j in range(data.r) for t in range(data.nperiodos)), lb=0, name=f"u"
     )  # tempo extra emprestado para o setup t + 1
+    mdl.e = mdl.continuous_var_dict(
+        ((j, t) for j in range(data.r) for t in range(data.nperiodos)), lb=0, name=f"e"
+    )  # folga no período t na máquina j
     mdl.x = mdl.continuous_var_dict(
         (
             (i, j, t, k)
@@ -80,7 +89,7 @@ def constraint_demanda_satisfeita(mdl: Model, data: dataCS) -> Model:
 def constraint_capacity(mdl: Model, data: dataCS) -> Model:
     for j in range(data.r):
         for t in range(data.nperiodos):
-            if t > 0:
+            if t > 0 and t < data.nperiodos:
                 mdl.add_constraint(
                     mdl.sum(data.st[i] * mdl.y[i, j, t] for i in range(data.nitems))
                     + mdl.sum(
@@ -89,6 +98,19 @@ def constraint_capacity(mdl: Model, data: dataCS) -> Model:
                         for k in range(t, data.nperiodos)
                     )
                     + mdl.u[j, t]
+                    + mdl.e[j, t]
+                    <= data.cap[0] + mdl.u[j, t - 1],
+                    ctname="capacity",
+                )
+            elif t == data.nperiodos:
+                mdl.add_constraint(
+                    mdl.sum(data.st[i] * mdl.y[i, j, t] for i in range(data.nitems))
+                    + mdl.sum(
+                        data.vt[i] * data.d[i, k] * mdl.x[i, j, t, k]
+                        for i in range(data.nitems)
+                        for k in range(t, data.nperiodos)
+                    )
+                    + mdl.e[j, t]
                     <= data.cap[0] + mdl.u[j, t - 1],
                     ctname="capacity",
                 )
@@ -101,6 +123,7 @@ def constraint_capacity(mdl: Model, data: dataCS) -> Model:
                         for k in range(t, data.nperiodos)
                     )
                     + mdl.u[j, t]
+                    + mdl.e[j, t]
                     <= data.cap[0]
                 )
     return mdl
@@ -144,14 +167,22 @@ def constraint_setup_max_um_item(mdl: Model, data: dataCS) -> Model:
     )
     return mdl
 
-def constraint_simetria_do_crossover(mdl: Model, data: dataCS) -> Model:
-    for j in range(data.r):
-        for t in range(1,data.nperiodos):
-            mdl.add_constraints(mdl.v[1,j,t-1] == mdl.y[1,j,t])
 
-            for i in range(1,data.nitens):
-                    mdl.add_constraints(mdl.v[i,j,t-1] >= mdl.y[i,j,t] - mdl.sum(mdl.y[u,j,t] for u in range(i)))
+def constraint_crossover_by_machine(mdl: Model, data: dataCS) -> Model:
+    for j in range(data.r):
+        for t in range(data.nperiodos):
+            mdl.add_constraint(
+                mdl.sum(mdl.v[i, j, t] for i in range(data.nitems)) == mdl.z[j, t]
+            )
     return mdl
+
+
+def constraint_crossover_by_need(mdl: Model, data: dataCS) -> Model:
+    for j in range(data.r):
+        for t in range(data.nperiodos - 1):
+            mdl.add_constraint(mdl.e[j, t + 1] <= (1 - mdl.z[j, t]) * data.cap[0])
+    return mdl
+
 
 def total_setup_cost(mdl, data):
     return sum(
@@ -213,10 +244,13 @@ def build_model(data: dataCS, capacity: float) -> Model:
     mdl = constraint_tempo_emprestado_crossover(mdl, data)
     mdl = constraint_proibe_crossover_sem_setup(mdl, data)
     mdl = constraint_setup_max_um_item(mdl, data)
-    mdl = constraint_simetria_do_crossover(mdl, data)
+    mdl = constraint_crossover_by_machine(mdl, data)
+    mdl = constraint_crossover_by_need(mdl, data)
 
     mdl.add_kpi(total_setup_cost(mdl, data), "total_setup_cost")
     mdl.add_kpi(total_estoque_cost(mdl, data), "total_estoque_cost")
     mdl.add_kpi(used_capacity(mdl, data), "used_capacity")
     mdl.add_kpi(total_y(mdl, data), "total_y")
+    # mdl.add_kpi(relaxacao_linear(data), "relaxacao_linear")
     return mdl, data
+
