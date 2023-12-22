@@ -198,6 +198,12 @@ def solve_optimized_model(
         constants.OTIMIZADOS_INDIVIDUAIS_PATH / suffix_path
     )
 
+    path_to_detalhados = Path.resolve(constants.DETALHADOS_INDIVIDUAIS_PATH / suffix_path)
+
+    # Adicione esta parte para salvar os valores das variáveis em um arquivo Excel
+    result.as_df().to_excel(f"{path_to_detalhados}_variables.xlsx", index=False)
+    status.as_df().to_excel(f"{path_to_detalhados}_variables_relaxado.xlsx", index=False)
+
     df_results_optimized = pd.DataFrame([kpis])
     df_results_optimized.to_excel(f"{complete_path_to_save}.xlsx", index=False)
 
