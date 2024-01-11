@@ -21,6 +21,7 @@ if __name__ == "__main__":
     #     env_formulation="0st_ref",
     # )
     running_all_instance_with_chosen_capacity(
+        context,
         first_formulation_build_model,
         path_to_save=f"otimizados_1_experiment_1.xlsx",
         env_formulation="1_ref",
@@ -32,6 +33,7 @@ if __name__ == "__main__":
         env_formulation="2_ref",
     )
     running_all_instance_with_chosen_capacity(
+        context,
         third_formulation_build_model,
         path_to_save=f"otimizados_3_experiment_1.xlsx",
         env_formulation="3_ref",
