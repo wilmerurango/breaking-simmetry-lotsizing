@@ -165,6 +165,16 @@ def get_and_save_results(path_to_read: str, path_to_save: Path) -> None:
     df_results_optimized.to_excel(path_to_save, index=False)
 
 
+    def _sc_aux(data: dataCS):
+        sc_aux = []
+        for j in range(data.nmaquinas):
+            coluna = []
+            for i in range(data.nitens):
+                coluna.append(data.sc[i] + j*0.1)
+            sc_aux.append(coluna)
+        data = dataCS(context, dataset, r=nmaquinas)
+                
+
 def solve_optimized_model(
     context: ProjectContext, dataset: str, build_model, capacity: Dict, env_formulation: int, nmaquinas: int = 8
 ) -> None:

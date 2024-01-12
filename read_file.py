@@ -96,6 +96,7 @@ class dataCS(LerDados):
     vc: np.array
     cs: Dict
     r: int
+    sc_aux: Dict
 
     def __init__(self, context: ProjectContext, instance: str, r: int, original_capacity: bool = False):
         super().__init__(context, instance)

@@ -5,6 +5,8 @@ from docplex.mp.model import Model
 from read_file import dataCS
 
 
+def create_sc_aux(mdl: Model, data: dataCS)
+
 def create_variables(mdl: Model, data: dataCS) -> Model:
     mdl.y = mdl.binary_var_dict(
         (
