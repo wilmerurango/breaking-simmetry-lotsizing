@@ -89,7 +89,7 @@ def constraint_demanda_satisfeita(mdl: Model, data: dataCS) -> Model:
 def constraint_capacity(mdl: Model, data: dataCS) -> Model:
     for j in range(data.r):
         for t in range(data.nperiodos):
-            if t > 0 and t < data.nperiodos:
+            if t > 0:
                 mdl.add_constraint(
                     mdl.sum(data.st[i] * mdl.y[i, j, t] for i in range(data.nitems))
                     + mdl.sum(
@@ -99,21 +99,10 @@ def constraint_capacity(mdl: Model, data: dataCS) -> Model:
                     )
                     + mdl.u[j, t]
                     + mdl.e[j, t]
-                    <= data.cap[0] + mdl.u[j, t - 1],
+                    == data.cap[0] + mdl.u[j, t - 1],
                     ctname="capacity",
                 )
-            elif t == data.nperiodos:
-                mdl.add_constraint(
-                    mdl.sum(data.st[i] * mdl.y[i, j, t] for i in range(data.nitems))
-                    + mdl.sum(
-                        data.vt[i] * data.d[i, k] * mdl.x[i, j, t, k]
-                        for i in range(data.nitems)
-                        for k in range(t, data.nperiodos)
-                    )
-                    + mdl.e[j, t]
-                    <= data.cap[0] + mdl.u[j, t - 1],
-                    ctname="capacity",
-                )
+
             else:
                 mdl.add_constraint(
                     mdl.sum(data.st[i] * mdl.y[i, j, t] for i in range(data.nitems))
@@ -124,7 +113,7 @@ def constraint_capacity(mdl: Model, data: dataCS) -> Model:
                     )
                     + mdl.u[j, t]
                     + mdl.e[j, t]
-                    <= data.cap[0]
+                    == data.cap[0]
                 )
     return mdl
 
