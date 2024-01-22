@@ -52,7 +52,7 @@ def define_obj_function(mdl: Model, data: dataCS) -> Model:
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
-    ) + sum(
+    ) + mdl.sum(
         data.cs[i, t, k] * mdl.x[i, j, t, k]
         for i in range(data.nitems)
         for j in range(data.r)
