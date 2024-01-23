@@ -7,6 +7,7 @@ from zero_formulation import build_model as classical_formulation_build_model
 from first_formulation import build_model as first_formulation_build_model
 from second_formulation import build_model as second_formulation_build_model
 from third_formulation import build_model as third_formulation_build_model
+from fourth_formulation import build_model as fourth_formulation_build_model
 
 if __name__ == "__main__":
     # for num in [1]:
@@ -15,11 +16,11 @@ if __name__ == "__main__":
     #         context,
     #         classical_formulation_build_model,
     #     )
-    # running_all_instance_with_chosen_capacity(
-    #     classical_formulation_build_model,
-    #     path_to_save="otimizados0.xlsx",
-    #     env_formulation="0st_ref",
-    # )
+    running_all_instance_with_chosen_capacity(
+        classical_formulation_build_model,
+        path_to_save="otimizados0.xlsx",
+        env_formulation="0st_ref",
+    )
     running_all_instance_with_chosen_capacity(
         context,
         first_formulation_build_model,
@@ -38,8 +39,8 @@ if __name__ == "__main__":
         path_to_save=f"otimizados_3_experiment_1.xlsx",
         env_formulation="3_ref",
     )
-    # running_all_instance_with_chosen_capacity(
-    #     fourth_reformulation_build_model,
-    #     path_to_save="otimizados4.xlsx",
-    #     env_formulation="4nd_ref",
-    # )
+    running_all_instance_with_chosen_capacity(
+        fourth_formulation_build_model,
+        path_to_save="otimizados4.xlsx",
+        env_formulation="4nd_ref",
+    )
