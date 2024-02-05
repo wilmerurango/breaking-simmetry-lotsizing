@@ -20,12 +20,12 @@ if __name__ == "__main__":
     #     path_to_save="otimizados0.xlsx",
     #     env_formulation="0st_ref",
     # )
-    running_all_instance_with_chosen_capacity(
-        context,
-        first_formulation_build_model,
-        path_to_save=f"otimizados_1_experiment_1.xlsx",
-        env_formulation="1_ref",
-    )
+    # running_all_instance_with_chosen_capacity(
+    #     context,
+    #     first_formulation_build_model,
+    #     path_to_save=f"otimizados_1_experiment_1.xlsx",
+    #     env_formulation="1_ref",
+    # )
     running_all_instance_with_chosen_capacity(
         context,
         second_formulation_build_model,
