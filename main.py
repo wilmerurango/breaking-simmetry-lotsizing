@@ -20,7 +20,7 @@ if __name__ == "__main__":
         context,
         classical_formulation_build_model,
         path_to_save="otimizados0.xlsx",
-        env_formulation="0st_ref",
+        env_formulation="0_ref",
     )
     # running_all_instance_with_chosen_capacity(
     #     context,
@@ -44,5 +44,5 @@ if __name__ == "__main__":
     #     context,
     #     fourth_formulation_build_model,
     #     path_to_save="otimizados4.xlsx",
-    #     env_formulation="4nd_ref",
+    #     env_formulation="4_ref",
     # )
