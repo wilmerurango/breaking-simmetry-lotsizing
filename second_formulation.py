@@ -147,10 +147,10 @@ def constraint_setup_max_um_item(mdl: Model, data: dataCS) -> Model:
 def constraint_simetria_do_crossover(mdl: Model, data: dataCS) -> Model:
     for j in range(data.r):
         for t in range(1,data.nperiodos):
-            mdl.add_constraints(mdl.v[1,j,t-1] == mdl.y[1,j,t])
+            mdl.add_constraint(mdl.v[1,j,t-1] == mdl.y[1,j,t])
 
-            for i in range(1,data.nitens):
-                    mdl.add_constraints(mdl.v[i,j,t-1] >= mdl.y[i,j,t] - mdl.sum(mdl.y[u,j,t] for u in range(i)))
+            for i in range(1,data.nitems):
+                    mdl.add_constraint(mdl.v[i,j,t-1] >= mdl.y[i,j,t] - mdl.sum(mdl.y[u,j,t] for u in range(i)))
     return mdl
 
 def total_setup_cost(mdl, data):
