@@ -41,7 +41,6 @@ def create_variables(mdl: Model, data: dataCS) -> Model:
             for k in range(data.nperiodos)
         ),
         lb=0,
-        ub=1,
         name=f"x",
     )
     return mdl
