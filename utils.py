@@ -53,16 +53,16 @@ def add_new_kpi(kpis: Dict[str, any], result, data: dataCS, **kwargs) -> dict:
         kpis[key] = value
     return kpis
 
-# def cs_aux(data: dataCS):
-#     cs_aux = np.zeros((data.nitems, data.r, data.nperiodos, data.nperiodos))
-#     for j in range(data.r):
-#         for i in range(data.nitems):
-#             for t in range(data.nperiodos):
-#                 for k in range(data.nperiodos):
-#                     cs_aux[i, j, t, k] = (
-#                         data.vc[i, t] + 0.00001*j + sum(data.hc[i] for u in range(t, k))
-#                     ) * data.d[i, k]
-#     return cs_aux
+def cs_aux(data: dataCS):
+    cs_aux = np.zeros((data.nitems, data.r, data.nperiodos, data.nperiodos))
+    for j in range(data.r):
+        for i in range(data.nitems):
+            for t in range(data.nperiodos):
+                for k in range(data.nperiodos):
+                    cs_aux[i, j, t, k] = (
+                        data.vc[i, t] + 0.00001*j + sum(data.hc[i] for u in range(t, k))
+                    ) * data.d[i, k]
+    return cs_aux
 
 def closest_to_IDEAL_CAPACITY_percent(
     results_per_instance: List[Dict[str, any]]
