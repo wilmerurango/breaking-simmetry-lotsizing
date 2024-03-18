@@ -215,7 +215,6 @@ def build_model(data: dataCS, capacity: float) -> Model:
     mdl = constraint_tempo_emprestado_crossover(mdl, data)
     mdl = constraint_proibe_crossover_sem_setup(mdl, data)
     mdl = constraint_setup_max_um_item(mdl, data)
-    mdl = constraint_simetria_do_crossover(mdl, data)
     mdl = constraint_simetria_do_máquinas_nova(mdl, data)
 
     mdl.add_kpi(total_setup_cost(mdl, data), "total_setup_cost")
