@@ -19,12 +19,12 @@ if __name__ == "__main__":
     #         context,
     #         classical_formulation_build_model,
     #     )
-    running_all_instance_with_chosen_capacity(
-        context,
-        classical_formulation_build_model,
-        path_to_save="otimizados_0_experiment_1.xlsx",
-        env_formulation="0_ref",
-    )
+    # running_all_instance_with_chosen_capacity(
+    #     context,
+    #     classical_formulation_build_model,
+    #     path_to_save="otimizados_0_experiment_1.xlsx",
+    #     env_formulation="0_ref",
+    # )
     # running_all_instance_with_chosen_capacity(
     #     context,
     #     first_formulation_build_model,
@@ -59,7 +59,7 @@ if __name__ == "__main__":
         context,
         sixth_formulation_build_model,
         path_to_save="otimizados_6_experiment_1.xlsx",
-        env_formulation="5_ref",
+        env_formulation="6_ref",
     )
     running_all_instance_with_chosen_capacity(
         context,
