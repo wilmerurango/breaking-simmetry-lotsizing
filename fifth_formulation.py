@@ -7,7 +7,7 @@ from utils import cs_aux
 
 
 def create_variables(mdl: Model, data: dataCS) -> Model:
-    mdl.y = mdl.binary_var_dict(
+    mdl.z = mdl.binary_var_dict(
         (
             (i, j, t)
             for i in range(data.nitems)
@@ -16,9 +16,9 @@ def create_variables(mdl: Model, data: dataCS) -> Model:
         ),
         lb=0,
         ub=1,
-        name=f"y",
+        name=f"z",
     )
-    mdl.v = mdl.binary_var_dict(
+    mdl.w = mdl.binary_var_dict(
         (
             (i, j, t)
             for i in range(data.nitems)
@@ -27,11 +27,28 @@ def create_variables(mdl: Model, data: dataCS) -> Model:
         ),
         lb=0,
         ub=1,
-        name=f"v",
+        name=f"w",
     )
-    mdl.u = mdl.continuous_var_dict(
-        ((j, t) for j in range(data.r) for t in range(data.nperiodos)), lb=0, name=f"u"
-    )  # tempo extra emprestado para o setup t + 1
+    mdl.f = mdl.continuous_var_dict(
+        (
+            (i, j, t)
+            for i in range(data.nitems)
+            for j in range(data.r)
+            for t in range(data.nperiodos)
+        ),
+        lb=0,
+        name=f"f",
+    )
+    mdl.l = mdl.continuous_var_dict(
+        (
+            (i, j, t)
+            for i in range(data.nitems)
+            for j in range(data.r)
+            for t in range(data.nperiodos)
+        ),
+        lb=0,
+        name=f"l",
+    )
     mdl.z = mdl.continuous_var(lb=0, name=f"u")
     
     mdl.x = mdl.continuous_var_dict(
@@ -51,7 +68,8 @@ def create_variables(mdl: Model, data: dataCS) -> Model:
 def define_obj_function(mdl: Model, data: dataCS) -> Model:
     # cs_aux = cs_aux(data)
     mtd_func = mdl.sum(
-        data.sc[i] * mdl.y[i, j, t]
+        data.sc[i] * mdl.z[i, j, t]+
+        data.sc[i] * mdl.w[i, j, t]
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
@@ -81,37 +99,26 @@ def constraint_demanda_satisfeita(mdl: Model, data: dataCS) -> Model:
 
 
 def constraint_capacity(mdl: Model, data: dataCS) -> Model:
-    for j in range(data.r):
-        for t in range(data.nperiodos):
-            if t > 0:
-                mdl.add_constraint(
-                    mdl.sum(data.st[i] * mdl.y[i, j, t] for i in range(data.nitems))
-                    + mdl.sum(
-                        data.vt[i] * data.d[i, k] * mdl.x[i, j, t, k]
-                        for i in range(data.nitems)
-                        for k in range(t, data.nperiodos)
-                    )
-                    + mdl.u[j, t]
-                    <= data.cap[0] + mdl.u[j, t - 1],
-                    ctname="capacity",
+    for t in range(data.nperiodos):
+        for j in range(data.r):
+            mdl.add_constraint(
+                mdl.sum(data.st[i] * mdl.z[i, j, t] for i in range(data.nitems))
+                + mdl.sum(
+                    data.vt[i] * data.d[i, k] * mdl.x[i, j, t, k]
+                    for i in range(data.nitems)
+                    for k in range(t, data.nperiodos)
                 )
-            else:
-                mdl.add_constraint(
-                    mdl.sum(data.st[i] * mdl.y[i, j, t] for i in range(data.nitems))
-                    + mdl.sum(
-                        data.vt[i] * data.d[i, k] * mdl.x[i, j, t, k]
-                        for i in range(data.nitems)
-                        for k in range(t, data.nperiodos)
-                    )
-                    + mdl.u[j, t]
-                    <= data.cap[0]
-                )
+                + mdl.sum(mdl.l[i,j,t] for i in range(data.nitems))
+                +mdl.sum(mdl.f[i,j,t] for i in range(data.nitems))
+                <= data.cap[0],
+                ctname="capacity",
+            )
     return mdl
 
 
 def constraint_setup(mdl: Model, data: dataCS) -> Model:
     mdl.add_constraints(
-        mdl.x[i, j, t, k] <= mdl.y[i, j, t]
+        mdl.x[i, j, t, k] <= mdl.z[i, j, t] + mdl.w[i, j, t]
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
@@ -119,31 +126,21 @@ def constraint_setup(mdl: Model, data: dataCS) -> Model:
     )
     return mdl
 
-
-def constraint_tempo_emprestado_crossover(mdl: Model, data: dataCS) -> Model:
-    # Linha 5  Uj,t-1 <= i=1∑n Vi,j,t-1 STi,t
-    for j in range(data.r):
-        for t in range(1, data.nperiodos):
-            mdl.add_constraint(
-                mdl.u[j, t - 1]
-                <= mdl.sum(mdl.v[i, j, t - 1] * data.st[i] for i in range(data.nitems))
-            )
-    return mdl
-
-
-def constraint_proibe_crossover_sem_setup(mdl: Model, data: dataCS) -> Model:
-    for i in range(data.nitems):
-        for j in range(data.r):
-            for t in range(1, data.nperiodos):
-                mdl.add_constraint(mdl.v[i, j, t - 1] <= mdl.y[i, j, t])
-    return mdl
-
-
-def constraint_setup_max_um_item(mdl: Model, data: dataCS) -> Model:
+def constraint_split_time(mdl: Model, data: dataCS) -> Model:
     mdl.add_constraints(
-        mdl.sum(mdl.v[i, j, t - 1] for i in range(data.nitems)) <= 1
+        mdl.f[i, j, t] + mdl.l[i,j,t] == mdl.w[i, j, t] * data.st[i, j, t]
+        for i in range(data.nitems)
         for j in range(data.r)
-        for t in range(1, data.nperiodos)
+        for t in range(data.nperiodos)
+    )
+    return mdl
+
+def constraint_split_max(mdl: Model, data: dataCS) -> Model:
+    mdl.add_constraints(
+        mdl.sum(mdl.w[i, j, t] for i in range(data.nitems)) <= 1
+        for i in range(data.nitems)
+        for j in range(data.r)
+        for t in range(data.nperiodos)
     )
     return mdl
     

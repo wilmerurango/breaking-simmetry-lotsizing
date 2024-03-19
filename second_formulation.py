@@ -1,12 +1,10 @@
-from typing import Dict, List
-
+from typing import Dict
 from docplex.mp.model import Model
 
 from read_file import dataCS
 
-
 def create_variables(mdl: Model, data: dataCS) -> Model:
-    mdl.y = mdl.binary_var_dict(
+    mdl.z = mdl.binary_var_dict(
         (
             (i, j, t)
             for i in range(data.nitems)
@@ -15,9 +13,9 @@ def create_variables(mdl: Model, data: dataCS) -> Model:
         ),
         lb=0,
         ub=1,
-        name=f"y",
+        name=f"z",
     )
-    mdl.v = mdl.binary_var_dict(
+    mdl.w = mdl.binary_var_dict(
         (
             (i, j, t)
             for i in range(data.nitems)
@@ -26,11 +24,8 @@ def create_variables(mdl: Model, data: dataCS) -> Model:
         ),
         lb=0,
         ub=1,
-        name=f"v",
+        name=f"w",
     )
-    mdl.u = mdl.continuous_var_dict(
-        ((j, t) for j in range(data.r) for t in range(data.nperiodos)), lb=0, name=f"u"
-    )  # tempo extra emprestado para o setup t + 1
     mdl.x = mdl.continuous_var_dict(
         (
             (i, j, t, k)
@@ -40,15 +35,38 @@ def create_variables(mdl: Model, data: dataCS) -> Model:
             for k in range(data.nperiodos)
         ),
         lb=0,
-        ub=1,
         name=f"x",
+    )
+    mdl.f = mdl.continuous_var_dict(
+        (
+            (i, j, t)
+            for i in range(data.nitems)
+            for j in range(data.r)
+            for t in range(data.nperiodos)
+        ),
+        lb=0,
+        name=f"f",
+    )
+    mdl.l = mdl.continuous_var_dict(
+        (
+            (i, j, t)
+            for i in range(data.nitems)
+            for j in range(data.r)
+            for t in range(data.nperiodos)
+        ),
+        lb=0,
+        name=f"l",
     )
     return mdl
 
 
 def define_obj_function(mdl: Model, data: dataCS) -> Model:
     mtd_func = mdl.sum(
-        data.sc[i] * mdl.y[i, j, t]
+        data.sc[i] * mdl.z[i, j, t]
+        for i in range(data.nitems)
+        for j in range(data.r)
+        for t in range(data.nperiodos) +
+        data.sc[i] * mdl.w[i, j, t]
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
@@ -78,37 +96,26 @@ def constraint_demanda_satisfeita(mdl: Model, data: dataCS) -> Model:
 
 
 def constraint_capacity(mdl: Model, data: dataCS) -> Model:
-    for j in range(data.r):
-        for t in range(data.nperiodos):
-            if t > 0:
-                mdl.add_constraint(
-                    mdl.sum(data.st[i] * mdl.y[i, j, t] for i in range(data.nitems))
-                    + mdl.sum(
-                        data.vt[i] * data.d[i, k] * mdl.x[i, j, t, k]
-                        for i in range(data.nitems)
-                        for k in range(t, data.nperiodos)
-                    )
-                    + mdl.u[j, t]
-                    <= data.cap[0] + mdl.u[j, t - 1],
-                    ctname="capacity",
+    for t in range(data.nperiodos):
+        for j in range(data.r):
+            mdl.add_constraint(
+                mdl.sum(data.st[i] * mdl.z[i, j, t] for i in range(data.nitems))
+                + mdl.sum(
+                    data.vt[i] * data.d[i, k] * mdl.x[i, j, t, k]
+                    for i in range(data.nitems)
+                    for k in range(t, data.nperiodos)
                 )
-            else:
-                mdl.add_constraint(
-                    mdl.sum(data.st[i] * mdl.y[i, j, t] for i in range(data.nitems))
-                    + mdl.sum(
-                        data.vt[i] * data.d[i, k] * mdl.x[i, j, t, k]
-                        for i in range(data.nitems)
-                        for k in range(t, data.nperiodos)
-                    )
-                    + mdl.u[j, t]
-                    <= data.cap[0]
-                )
+                + mdl.sum(mdl.l[i,j,t] for i in range(data.nitems))
+                +mdl.sum(mdl.f[i,j,t] for i in range(data.nitems))
+                <= data.cap[0],
+                ctname="capacity",
+            )
     return mdl
 
 
 def constraint_setup(mdl: Model, data: dataCS) -> Model:
     mdl.add_constraints(
-        mdl.x[i, j, t, k] <= mdl.y[i, j, t]
+        mdl.x[i, j, t, k] <= mdl.z[i, j, t] + mdl.w[i, j, t]
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
@@ -116,46 +123,36 @@ def constraint_setup(mdl: Model, data: dataCS) -> Model:
     )
     return mdl
 
-
-def constraint_tempo_emprestado_crossover(mdl: Model, data: dataCS) -> Model:
-    # Linha 5  Uj,t-1 <= i=1∑n Vi,j,t-1 STi,t
-    for j in range(data.r):
-        for t in range(1, data.nperiodos):
-            mdl.add_constraint(
-                mdl.u[j, t - 1]
-                <= mdl.sum(mdl.v[i, j, t - 1] * data.st[i] for i in range(data.nitems))
-            )
-    return mdl
-
-
-def constraint_proibe_crossover_sem_setup(mdl: Model, data: dataCS) -> Model:
-    for i in range(data.nitems):
-        for j in range(data.r):
-            for t in range(1, data.nperiodos):
-                mdl.add_constraint(mdl.v[i, j, t - 1] <= mdl.y[i, j, t])
-    return mdl
-
-
-def constraint_setup_max_um_item(mdl: Model, data: dataCS) -> Model:
+def constraint_split_time(mdl: Model, data: dataCS) -> Model:
     mdl.add_constraints(
-        mdl.sum(mdl.v[i, j, t - 1] for i in range(data.nitems)) <= 1
+        mdl.f[i, j, t] + mdl.l[i,j,t] == mdl.w[i, j, t] * data.st[i, j, t]
+        for i in range(data.nitems)
         for j in range(data.r)
-        for t in range(1, data.nperiodos)
+        for t in range(data.nperiodos)
     )
     return mdl
 
-def constraint_simetria_do_crossover(mdl: Model, data: dataCS) -> Model:
-    for j in range(data.r):
-        for t in range(1,data.nperiodos):
-            mdl.add_constraint(mdl.v[1,j,t-1] == mdl.y[1,j,t])
+def constraint_split_max(mdl: Model, data: dataCS) -> Model:
+    mdl.add_constraints(
+        mdl.sum(mdl.w[i, j, t] for i in range(data.nitems)) <= 1
+        for i in range(data.nitems)
+        for j in range(data.r)
+        for t in range(data.nperiodos)
+    )
+    return mdl
 
-            for i in range(1,data.nitems):
-                    mdl.add_constraint(mdl.v[i,j,t-1] >= mdl.y[i,j,t] - mdl.sum(mdl.y[u,j,t] for u in range(i)))
+def constraint_simmetry_crossover(mdl: Model, data: dataCS) -> Model:
+    mdl.add_constraints(
+        mdl.sum(mdl.w[k, j, t] for k in range(i-1)) <= mdl.z[i,t,j]
+        for i in range(1,data.nitems)
+        for j in range(data.r)
+        for t in range(data.nperiodos)
+    )
     return mdl
 
 def total_setup_cost(mdl, data):
     return sum(
-        data.sc[i] * mdl.y[i, j, t]
+        data.sc[i] * (mdl.z[i, j, t]+mdl.w[i, j, t])
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
@@ -174,7 +171,7 @@ def total_estoque_cost(mdl, data):
 
 def used_capacity(mdl, data):
     return sum(
-        data.st[i] * mdl.y[i, j, t]
+        data.st[i] * (mdl.z[i, j, t]+mdl.w[i, j, t])
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
@@ -189,32 +186,38 @@ def used_capacity(mdl, data):
 
 def total_y(mdl, data):
     return sum(
-        mdl.y[i, j, t]
+        mdl.z[i, j, t]+mdl.w[i, j, t]
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
     )
 
 
-def closest_to_75_percent(results_per_instance: List[Dict[str, any]]) -> Dict[str, any]:
-    """Dado uma lista de resultados para uma instância, retorne aquele mais próximo de 75% de utilização da capacidade."""
-    return min(results_per_instance, key=lambda x: abs(x["utilization_capacity"] - 75))
+def add_new_kpi(kpis: Dict[str, any], result, data: dataCS) -> dict:
+    kpis["Instance"] = data.instance
+    kpis["Best Bound"] = result.solve_details.best_bound
+    kpis["Gap"] = result.solve_details.gap
+    kpis["Nodes Processed"] = result.solve_details.gap
+    kpis["Tempo de Solução"] = result.solve_details.time
+    kpis["capacity"] = data.cap[0]
+    kpis["utilization_capacity"] = (
+        100 * kpis.get("used_capacity", 0) / (data.cap[0] * data.r * data.nperiodos)
+    )
+    kpis["nmaquinas"] = data.r
+    return kpis
 
 
-def build_model(data: dataCS, capacity: float) -> Model:
+def build_model(data: dataCS, capacity: float) -> Model:    
     data.cap[0] = capacity
     mdl = Model(name="mtd")
-    mdl.context.cplex_parameters.threads = 1
     mdl = create_variables(mdl, data)
     mdl = define_obj_function(mdl, data)
     mdl = constraint_demanda_satisfeita(mdl, data)
     mdl = constraint_capacity(mdl, data)
     mdl = constraint_setup(mdl, data)
-    mdl = constraint_tempo_emprestado_crossover(mdl, data)
-    mdl = constraint_proibe_crossover_sem_setup(mdl, data)
-    mdl = constraint_setup_max_um_item(mdl, data)
-    mdl = constraint_simetria_do_crossover(mdl, data)
-
+    mdl = constraint_split_time(mdl, data)
+    mdl = constraint_split_max(mdl, data)
+    mdl = constraint_simmetry_crossover(mdl, data)
     mdl.add_kpi(total_setup_cost(mdl, data), "total_setup_cost")
     mdl.add_kpi(total_estoque_cost(mdl, data), "total_estoque_cost")
     mdl.add_kpi(used_capacity(mdl, data), "used_capacity")
