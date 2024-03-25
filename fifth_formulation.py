@@ -68,8 +68,7 @@ def create_variables(mdl: Model, data: dataCS) -> Model:
 def define_obj_function(mdl: Model, data: dataCS) -> Model:
     # cs_aux = cs_aux(data)
     mtd_func = mdl.sum(
-        data.sc[i] * mdl.z[i, j, t]+
-        data.sc[i] * mdl.w[i, j, t]
+        data.sc[i] * (mdl.z[i, j, t]+ mdl.w[i, j, t])
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
@@ -128,7 +127,7 @@ def constraint_setup(mdl: Model, data: dataCS) -> Model:
 
 def constraint_split_time(mdl: Model, data: dataCS) -> Model:
     mdl.add_constraints(
-        mdl.f[i, j, t] + mdl.l[i,j,t] == mdl.w[i, j, t] * data.st[i, j, t]
+        mdl.f[i, j, t] + mdl.l[i,j,t-1] == mdl.w[i, j, t] * data.st[i]
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
@@ -138,7 +137,6 @@ def constraint_split_time(mdl: Model, data: dataCS) -> Model:
 def constraint_split_max(mdl: Model, data: dataCS) -> Model:
     mdl.add_constraints(
         mdl.sum(mdl.w[i, j, t] for i in range(data.nitems)) <= 1
-        for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
     )
@@ -216,9 +214,6 @@ def build_model(data: dataCS, capacity: float) -> Model:
     mdl = constraint_demanda_satisfeita(mdl, data)
     mdl = constraint_capacity(mdl, data)
     mdl = constraint_setup(mdl, data)
-    mdl = constraint_tempo_emprestado_crossover(mdl, data)
-    mdl = constraint_proibe_crossover_sem_setup(mdl, data)
-    mdl = constraint_setup_max_um_item(mdl, data)
 
     mdl.add_kpi(total_setup_cost(mdl, data), "total_setup_cost")
     mdl.add_kpi(total_estoque_cost(mdl, data), "total_estoque_cost")

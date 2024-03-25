@@ -62,8 +62,7 @@ def create_variables(mdl: Model, data: dataCS) -> Model:
 
 def define_obj_function(mdl: Model, data: dataCS) -> Model:
     mtd_func = mdl.sum(
-        data.sc[i] * mdl.z[i, j, t] +
-        data.sc[i] * mdl.w[i, j, t]
+        data.sc[i] * (mdl.z[i, j, t] + mdl.w[i, j, t])
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
@@ -122,17 +121,16 @@ def constraint_setup(mdl: Model, data: dataCS) -> Model:
 
 def constraint_split_time(mdl: Model, data: dataCS) -> Model:
     mdl.add_constraints(
-        mdl.f[i, j, t] + mdl.l[i,j,t] == mdl.w[i, j, t] * data.st[i, j, t]
+        mdl.f[i, j, t] + mdl.l[i,j,t-1] == mdl.w[i, j, t] * data.st[i]
         for i in range(data.nitems)
         for j in range(data.r)
-        for t in range(data.nperiodos)
+        for t in range(1,data.nperiodos)
     )
     return mdl
 
 def constraint_split_max(mdl: Model, data: dataCS) -> Model:
     mdl.add_constraints(
         mdl.sum(mdl.w[i, j, t] for i in range(data.nitems)) <= 1
-        for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
     )
