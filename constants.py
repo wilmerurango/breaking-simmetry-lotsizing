@@ -1,14 +1,15 @@
 from pathlib import Path
 
-INSTANCES = [f"F{i}.DAT" for i in range(1, 71)] + [f"G{i}.DAT" for i in range(1, 76)]
-#INSTANCES = [#"F1.DAT",
+# INSTANCES = [f"F{i}.DAT" for i in range(1, 71)] + [f"G{i}.DAT" for i in range(1, 76)]
+INSTANCES = ["F1.DAT",
               #"F25.DAT", 
               #"G59.DAT", 
-              #"G64.DAT"]
-MAQUINAS = [2,4,6]
+              #"G64.DAT"
+             ]
+MAQUINAS = [2]
 NUM_POINTS = 10
 FAST_TIMELIMIT = 20
-TIMELIMIT = 3600
+TIMELIMIT = 100
 
 CAPACIDADES_PATH = Path.resolve(Path.cwd() / "resultados" / "capacidades.xlsx")
 RESULTADOS_INDIVIDUAIS_PATH = Path.resolve(Path.cwd() / "resultados" / "individuais")
