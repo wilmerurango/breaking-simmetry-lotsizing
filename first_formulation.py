@@ -120,11 +120,14 @@ def constraint_setup(mdl: Model, data: dataCS) -> Model:
     return mdl
 
 def constraint_split_time(mdl: Model, data: dataCS) -> Model:
-    mdl.add_constraints(
-        mdl.f[i, j, t] + mdl.l[i,j,t-1] == mdl.w[i, j, t] * data.st[i]
-        for i in range(data.nitems)
-        for j in range(data.r)
-        for t in range(1,data.nperiodos)
+    for i in range(data.nitems):
+        for j in range(data.r):
+            mdl.add_constraint(
+                    mdl.f[i, j, 0] == mdl.w[i, j, 0] * data.st[i])
+            for t in range(1,data.nperiodos):
+                mdl.add_constraint(
+                    mdl.f[i, j, t] + mdl.l[i,j,t-1] == mdl.w[i, j, t] * data.st[i]
+        
     )
     return mdl
 
@@ -133,6 +136,22 @@ def constraint_split_max(mdl: Model, data: dataCS) -> Model:
         mdl.sum(mdl.w[i, j, t] for i in range(data.nitems)) <= 1
         for j in range(data.r)
         for t in range(data.nperiodos)
+    )
+    return mdl
+
+def constraint_variavel_w(mdl: Model, data: dataCS) -> Model:
+    mdl.add_constraints(
+        mdl.w[i,j,0] == 0
+        for j in range(data.r)
+        for i in range(data.nitems)
+    )
+    return mdl
+
+def constraint_variavel_f(mdl: Model, data: dataCS) -> Model:
+    mdl.add_constraints(
+        mdl.f[i,j,0] == 0
+        for j in range(data.r)
+        for i in range(data.nitems)
     )
     return mdl
 
@@ -158,7 +177,7 @@ def total_estoque_cost(mdl, data):
 
 def used_capacity(mdl, data):
     return sum(
-        data.st[i] * (mdl.z[i, j, t]+mdl.w[i, j, t])
+        data.st[i] * mdl.z[i, j, t]+ mdl.l[i, j, t] + mdl.f[i,j,t]
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
@@ -204,6 +223,8 @@ def build_model(data: dataCS, capacity: float) -> Model:
     mdl = constraint_setup(mdl, data)
     mdl = constraint_split_time(mdl, data)
     mdl = constraint_split_max(mdl, data)
+    mdl = constraint_variavel_w(mdl, data)
+    mdl = constraint_variavel_f(mdl, data)
     mdl.add_kpi(total_setup_cost(mdl, data), "total_setup_cost")
     mdl.add_kpi(total_estoque_cost(mdl, data), "total_estoque_cost")
     mdl.add_kpi(used_capacity(mdl, data), "used_capacity")
