@@ -13,18 +13,18 @@ from sixth_formulation import build_model as sixth_formulation_build_model
 from seventh_formulation import build_model as seventh_formulation_build_model
 
 if __name__ == "__main__":
-    # for num in [1]:
-    context = ProjectContext(f"experimentos/experimento1.yml", 1)
-    #     running_all_instance_choose_capacity(
-    #         context,
-    #         classical_formulation_build_model,
-    #     )
-    running_all_instance_with_chosen_capacity(
-        context,
-        classical_formulation_build_model,
-        path_to_save="otimizados_0_experiment_1.xlsx",
-        env_formulation="0_ref",
-    )
+    for num in [1]:
+        context = ProjectContext(f"experimentos/experimento1.yml", 1)
+        running_all_instance_choose_capacity(
+            context,
+            classical_formulation_build_model,
+        )
+    # running_all_instance_with_chosen_capacity(
+    #     context,
+    #     classical_formulation_build_model,
+    #     path_to_save="otimizados_0_experiment_1.xlsx",
+    #     env_formulation="0_ref",
+    # )
     # running_all_instance_with_chosen_capacity(
     #     context,
     #     first_formulation_build_model,
