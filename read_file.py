@@ -22,7 +22,7 @@ class LerDados:
 
     def __init__(self, context: ProjectContext, instance: str):
         self.instance = instance
-        self._instance = Path.resolve(Path.cwd() / "data" / instance)
+        self._instance = Path.resolve(Path.cwd() / "540data" / instance)
         sep = self._detect_delimiter()
         column_names = self._generate_cols(sep=sep)
         df = pd.read_csv(
@@ -87,7 +87,7 @@ class LerDados:
 
 
 if __name__ == "__main__":
-    ler = LerDados("G73.dat")
+    ler = LerDados("X21117A.dat")
     pass
 
 
@@ -133,5 +133,7 @@ class dataCS(LerDados):
 
 
 if __name__ == "__main__":
-    ler = LerDados("F1.dat")
-    data = dataCS("F1.dat", r=2)
+    ler = LerDados("X11117A.dat")
+    data = dataCS("X11117A.dat", r=2)
+
+    
