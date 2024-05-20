@@ -87,7 +87,7 @@ def choose_capacity(
 
     for cap in np.linspace(
         original_capacity,
-        original_capacity * 2,
+        original_capacity * 3,
         num=constants.NUM_POINTS,
         endpoint=True,
     ):

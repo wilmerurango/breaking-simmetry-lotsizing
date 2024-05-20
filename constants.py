@@ -9,7 +9,7 @@ INSTANCES = [f"X{i}{j}{k}{l}{m}{n}.DAT" for i in range(1, 4) for j in range(1,3)
               #"G59.DAT", 
               #"G64.DAT"]
 MAQUINAS = [2,4,6]
-NUM_POINTS = 10
+NUM_POINTS = 20
 FAST_TIMELIMIT = 20
 TIMELIMIT = 3600
 
