@@ -140,12 +140,12 @@ def running_all_instance_choose_capacity(context: ProjectContext, build_model) -
         print("entrei 2")
         with MPIPoolExecutor() as executor:
             print("entrei 3")    
-            print((context, dataset, build_model, nmaq)
-                    for dataset in constants.INSTANCES
-                    for nmaq in constants.MAQUINAS)    
-            print(len((context, dataset, build_model, nmaq)
+            print(list((context, dataset, build_model, nmaq)
                     for dataset in constants.INSTANCES
                     for nmaq in constants.MAQUINAS))    
+            print(len(list((context, dataset, build_model, nmaq)
+                    for dataset in constants.INSTANCES
+                    for nmaq in constants.MAQUINAS)))    
             futures = executor.starmap(
                 choose_capacity,
                 (
