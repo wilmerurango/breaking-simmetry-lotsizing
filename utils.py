@@ -83,6 +83,7 @@ def choose_capacity(
 ) -> None:    
     print("inicio")
     data = dataCS(context, dataset, r=nmaquinas)
+    print("passei datacap")
     original_capacity = data.cap[0] / data.r
     instance_results = []
 
