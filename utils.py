@@ -81,20 +81,16 @@ def choose_capacity(
     nmaquinas: int = 2,
     get_closest: bool = True,
 ) -> None:    
-    print("inicio")
     data = dataCS(context, dataset, r=nmaquinas)
-    print("passei datacap")
     original_capacity = data.cap[0] / data.r
     instance_results = []
 
-    print("escolhendo cap")
     for cap in np.linspace(
         original_capacity,
         original_capacity * 3,
         num=constants.NUM_POINTS,
         endpoint=True,
     ):
-        print("entrei no for")
         mdl, data = build_model(data, np.ceil(cap))
         mdl.parameters.timelimit = constants.FAST_TIMELIMIT
         result = mdl.solve()
@@ -132,7 +128,6 @@ def choose_capacity(
 def running_all_instance_choose_capacity(context: ProjectContext, build_model) -> None:
     # Executando e coletando os resultados
     final_results = []
-    print("entrei")
     if not MPI_BOOL:        
         for dataset in constants.INSTANCES:
             for nmaq in constants.MAQUINAS:
@@ -141,15 +136,7 @@ def running_all_instance_choose_capacity(context: ProjectContext, build_model) -
                 if isinstance(best_result, pd.DataFrame):
                     final_results.append(best_result)
     else:
-        print("entrei 2")
-        with MPIPoolExecutor() as executor:
-            print("entrei 3")    
-            print(list((context, dataset, build_model, nmaq)
-                    for dataset in constants.INSTANCES
-                    for nmaq in constants.MAQUINAS))    
-            print(len(list((context, dataset, build_model, nmaq)
-                    for dataset in constants.INSTANCES
-                    for nmaq in constants.MAQUINAS)))    
+        with MPIPoolExecutor() as executor: 
             futures = executor.starmap(
                 choose_capacity,
                 (
@@ -160,7 +147,6 @@ def running_all_instance_choose_capacity(context: ProjectContext, build_model) -
             )
             executor.shutdown(wait=True)
             final_results.append(futures)
-    print("fim")
 
     get_and_save_results(
         path_to_read=constants.RESULTADOS_INDIVIDUAIS_PATH,
