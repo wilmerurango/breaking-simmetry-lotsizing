@@ -4,7 +4,7 @@ from pathlib import Path
 INSTANCES = [f"X{i}{j}{k}{l}{m}{n}.DAT" for i in range(1, 2) for j in range(1,2) for k in [1,2] 
              for l in range(1,3) for m in range(7,10) for n in ["A", "B", "C", "D", "E"]] + [f"X{i}{j}{k}{l}{m}{n}.DAT" for i in range(1, 2) for j in range(1,2) for k in [4] 
              for l in range(1,2) for m in range(7,9) for n in ["A", "B", "C", "D", "E"]]
-INSTANCES = ["X11117A.DAT"]
+INSTANCES = ["X11117A.dat"]
 MAQUINAS = [2]
 NUM_POINTS = 15
 FAST_TIMELIMIT = 20
