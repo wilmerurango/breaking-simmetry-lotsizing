@@ -20,7 +20,7 @@ class LerDados:
     sc: np.ndarray
     d: np.ndarray
 
-    def __init__(self, context: ProjectContext, instance: str):
+    def __init__(self, context: ProjectContext, instance: str, sort_index: bool = False):
         self.instance = instance
         self._instance = Path.resolve(Path.cwd() / "540data" / instance)
         sep = self._detect_delimiter()
@@ -40,7 +40,7 @@ class LerDados:
         self.cap = np.array(df.iloc[inicio:fim, 0].astype(float), dtype=int)
         inicio, fim = fim, fim + self.nitems
         self.vt = np.array(df.iloc[inicio:fim, 0].astype(float), dtype=int)
-        self.hc = context.custo_estoque * np.array(df.iloc[inicio:fim, 1].astype(float), dtype=int)
+        self.hc = context.custo_estoque * np.array(df.iloc[inicio:fim, 1].astype(float), dtype=float)
         self.st = np.array(df.iloc[inicio:fim, 2].astype(float), dtype=int)
         self.sc = context.custo_setup * np.array(df.iloc[inicio:fim, 3].astype(float), dtype=int)
         inicio, fim = fim, fim + self.nperiodos
@@ -57,7 +57,10 @@ class LerDados:
                 dtype=int,
             )
             self._d_no_sorted = np.append(demanda_sup, demanda_inf, axis=1).T
-        self._sort_index()
+        if sort_index:
+            self._sort_index()
+        else:
+            self.d = self._d_no_sorted
 
     def _sort_index(self):
         sorted_indices = sorted(range(len(self.st)), key=lambda i: self.st[i], reverse=True)
@@ -86,19 +89,14 @@ class LerDados:
         return column_names
 
 
-if __name__ == "__main__":
-    ler = LerDados("X21117A.dat")
-    pass
-
-
 @dataclass
 class dataCS(LerDados):
     vc: np.array
     cs: Dict
     r: int
 
-    def __init__(self, context: ProjectContext, instance: str, r: int, original_capacity: bool = False):
-        super().__init__(context, instance)
+    def __init__(self, context: ProjectContext, instance: str, r: int, original_capacity: bool = False, sort_index: bool = False):
+        super().__init__(context, instance, sort_index = sort_index)
         self._create_vc_cs()
         self.r = r
         if not original_capacity:
@@ -133,7 +131,8 @@ class dataCS(LerDados):
 
 
 if __name__ == "__main__":
-    ler = LerDados("X11117A.dat")
-    data = dataCS("X11117A.dat", r=2)
-
+    context = ProjectContext(f"experimentos/experimento1.yml", 1)
+    ler = LerDados(context,"X11117A.dat", sort_index = True)
+    data = dataCS(context,"X11117A.dat", r=2)
+    pass
     
