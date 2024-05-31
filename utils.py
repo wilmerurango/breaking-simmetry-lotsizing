@@ -85,6 +85,7 @@ def choose_capacity(
     original_capacity = data.cap[0] / data.r
     instance_results = []
 
+    print("escolhendo cap")
     for cap in np.linspace(
         original_capacity,
         original_capacity * 3,
