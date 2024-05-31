@@ -23,6 +23,8 @@ class LerDados:
     def __init__(self, context: ProjectContext, instance: str, sort_index: bool = False):
         self.instance = instance
         self._instance = Path.resolve(Path.cwd() / "540data" / instance)
+        if not Path.exists(self._instance):
+            print(f"{self.instance} NÃO EXISTE")
         sep = self._detect_delimiter()
         column_names = self._generate_cols(sep=sep)
         df = pd.read_csv(
