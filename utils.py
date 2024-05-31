@@ -81,6 +81,7 @@ def choose_capacity(
     nmaquinas: int = 2,
     get_closest: bool = True,
 ) -> None:    
+    print("inicio")
     data = dataCS(context, dataset, r=nmaquinas)
     original_capacity = data.cap[0] / data.r
     instance_results = []
