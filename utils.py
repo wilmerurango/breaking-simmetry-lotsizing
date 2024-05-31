@@ -157,8 +157,8 @@ def running_all_instance_choose_capacity(context: ProjectContext, build_model) -
                     for nmaq in constants.MAQUINAS
                 ),
             )
-            final_results.append(futures)
             executor.shutdown(wait=True)
+            final_results.append(futures)
     print("fim")
 
     get_and_save_results(
