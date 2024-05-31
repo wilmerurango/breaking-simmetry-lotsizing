@@ -92,6 +92,7 @@ def choose_capacity(
         num=constants.NUM_POINTS,
         endpoint=True,
     ):
+        print("entrei no for")
         mdl, data = build_model(data, np.ceil(cap))
         mdl.parameters.timelimit = constants.FAST_TIMELIMIT
         result = mdl.solve()
