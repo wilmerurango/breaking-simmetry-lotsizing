@@ -128,7 +128,7 @@ def choose_capacity(
 def running_all_instance_choose_capacity(context: ProjectContext, build_model) -> None:
     # Executando e coletando os resultados
     final_results = []
-
+    print("entrei")
     if not MPI_BOOL:        
         for dataset in constants.INSTANCES:
             for nmaq in constants.MAQUINAS:
@@ -137,7 +137,9 @@ def running_all_instance_choose_capacity(context: ProjectContext, build_model) -
                 if isinstance(best_result, pd.DataFrame):
                     final_results.append(best_result)
     else:
-        with MPIPoolExecutor() as executor:            
+        print("entrei 2")
+        with MPIPoolExecutor() as executor:
+            print("entrei 3")            
             futures = executor.starmap(
                 choose_capacity,
                 (
@@ -148,7 +150,8 @@ def running_all_instance_choose_capacity(context: ProjectContext, build_model) -
             )
             final_results.append(futures)
             executor.shutdown(wait=True)
-
+    print("fim")
+    
     get_and_save_results(
         path_to_read=constants.RESULTADOS_INDIVIDUAIS_PATH,
         path_to_save=constants.CAPACIDADES_PATH,
