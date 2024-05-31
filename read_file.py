@@ -133,6 +133,8 @@ class dataCS(LerDados):
 if __name__ == "__main__":
     context = ProjectContext(f"experimentos/experimento1.yml", 1)
     ler = LerDados(context,"X11117A.dat", sort_index = True)
+    print(ler)
     data = dataCS(context,"X11117A.dat", r=2)
+    print(data)
     pass
     
