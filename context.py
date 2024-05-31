@@ -10,7 +10,8 @@ class ProjectContext:
     experiment_id: str    
 
     def __init__(self, experiment_name: str, experiment_id: int):
-        self.experiment_id = experiment_id        
+        self.experiment_id = experiment_id 
+        self.experiment_name = experiment_name       
         with open(experiment_name,"r") as file:
             config = yaml.safe_load(file)
             for chave,valor in config["padrao"].items():
