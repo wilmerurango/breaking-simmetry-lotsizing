@@ -190,7 +190,7 @@ def constraint_condicional(mdl: Model, data: dataCS) -> Model:
         mdl.add_constraint(mdl.sum(mdl.z[j,t] for j in range(data.r)) <= 1000000*(1 - mdl.w[t]))
         for j in range(data.r):
             for i in range(data.nitems):
-                mdl.add_constraint(mdl.sum(2**(i-k) * mdl.y[k,j-1,t] for k in range(data.nitems+1)) >= mdl.sum(2**(i-k) * y[k,j,t] for k in range(i+1)))
+                mdl.add_constraint(mdl.sum(2**(i-k) * mdl.y[k,j-1,t] for k in range(data.nitems+1)) >= mdl.sum(2**(i-k) * mdl.y[k,j,t] for k in range(data.nitems+1)))
     return mdl
 
 def total_setup_cost(mdl, data):
