@@ -43,29 +43,11 @@ def create_variables(mdl: Model, data: dataCS) -> Model:
         ub=1,
         name=f"x",
     )
-    mdl.z = mdl.binary_var_dict(
-        ((j, t)
-            for t in range(data.nperiodos)
-            for j in range(data.r)
-        ),
-        lb=0,
-        ub=1,
-        name=f"z",
-    )
     mdl.w = mdl.binary_var_dict(
         data.nperiodos,
         lb=0,
         ub=1,
         name=f"w",
-    )
-    mdl.e = mdl.continuous_var_dict(
-        (
-            (j, t)
-            for j in range(data.r)
-            for t in range(data.nperiodos)
-        ),
-        lb=0,
-        name=f"e",
     )
     return mdl
 
@@ -168,29 +150,13 @@ def constraint_setup_max_um_item(mdl: Model, data: dataCS) -> Model:
     )
     return mdl
 
-def constraint_def_var_z(mdl: Model, data: dataCS) -> Model:
-    mdl.add_constraints(
-        mdl.sum(mdl.v[i, j, t] for i in range(data.nitems)) == mdl.z[j,t]
-        for j in range(data.r)
-        for t in range(data.nperiodos)
-    )
-    return mdl
-
-def constraint_def_var_e(mdl: Model, data: dataCS) -> Model:
-    mdl.add_constraints(
-        mdl.e[j, t+1] <= (1 - mdl.z[j,t] * data.cap[0])
-        for j in range(data.r)
-        for t in range(data.nperiodos-1)
-    )
-    return mdl
-
 def constraint_condicional(mdl: Model, data: dataCS) -> Model:
     for t in range(data.nperiodos):
-        mdl.add_constraint( mdl.sum(mdl.z[j,t] for j in range(data.r)) >= 1 - 1000000*mdl.w[t])
-        mdl.add_constraint(mdl.sum(mdl.z[j,t] for j in range(data.r)) <= 1000000*(1 - mdl.w[t]))
-        for j in range(data.r):
+        mdl.add_constraint(mdl.sum(mdl.v[i, j, t] for i in range(data.nitems) for j in range(data.r)) >= 1 - 1000000*mdl.w[t])
+        mdl.add_constraint(mdl.sum(mdl.v[i, j, t] for i in range(data.nitems) for j in range(data.r)) <= 1000000*(1 - mdl.w[t]))
+        for j in range(1,data.r):
             for i in range(data.nitems):
-                mdl.add_constraint(mdl.sum(2**(i-k) * mdl.y[k,j-1,t] for k in range(data.nitems+1)) >= mdl.sum(2**(i-k) * mdl.y[k,j,t] for k in range(data.nitems+1)))
+                mdl.add_constraint(mdl.sum(2**(i-k) * mdl.y[k,j-1,t] for k in range(i+1)) >= mdl.sum(2**(i-k) * mdl.y[k,j,t] for k in range(i+1)))
     return mdl
 
 def total_setup_cost(mdl, data):
@@ -253,8 +219,6 @@ def build_model(data: dataCS, capacity: float) -> Model:
     mdl = constraint_tempo_emprestado_crossover(mdl, data)
     mdl = constraint_proibe_crossover_sem_setup(mdl, data)
     mdl = constraint_setup_max_um_item(mdl, data)
-    mdl = constraint_def_var_z(mdl, data)
-    mdl = constraint_def_var_e(mdl, data)
     mdl = constraint_condicional(mdl, data)
 
     mdl.add_kpi(total_setup_cost(mdl, data), "total_setup_cost")
