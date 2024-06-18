@@ -122,8 +122,6 @@ def constraint_setup(mdl: Model, data: dataCS) -> Model:
 def constraint_split_time(mdl: Model, data: dataCS) -> Model:
     for i in range(data.nitems):
         for j in range(data.r):
-            mdl.add_constraint(
-                    mdl.f[i, j, 0] == mdl.w[i, j, 0] * data.st[i])
             for t in range(1,data.nperiodos):
                 mdl.add_constraint(
                     mdl.f[i, j, t] + mdl.l[i,j,t-1] == mdl.w[i, j, t] * data.st[i]
