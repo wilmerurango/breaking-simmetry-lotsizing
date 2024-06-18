@@ -124,7 +124,7 @@ def constraint_split_time(mdl: Model, data: dataCS) -> Model:
         mdl.f[i, j, t] + mdl.l[i,j,t-1] == mdl.w[i, j, t] * data.st[i]
         for i in range(data.nitems)
         for j in range(data.r)
-        for t in range(data.nperiodos)
+        for t in range(1,data.nperiodos)
     )
     return mdl
 
@@ -142,6 +142,31 @@ def constraint_simmetry_machine(mdl: Model, data: dataCS) -> Model:
         mdl.sum(2^(i-k)*(mdl.w[k, j, 1] + mdl.z[k,j,1]) for k in range(i+1))
         for i in range(data.nitems)
         for j in range(1,data.r)
+    )
+    return mdl
+
+def constraint_symmetry_breaking(mdl: Model, data: dataCS) -> Model:
+    mdl.add_constraints(
+        mdl.sum(mdl.w[u, j, t] for u in range(i)) >= mdl.z[i,j,t]
+        for i in range(1,data.nitems)
+        for j in range(data.r)
+        for t in range(data.nperiodos)
+    )
+    return mdl
+
+def constraint_variavel_w(mdl: Model, data: dataCS) -> Model:
+    mdl.add_constraints(
+        mdl.w[i,j,0] == 0
+        for j in range(data.r)
+        for i in range(data.nitems)
+    )
+    return mdl
+
+def constraint_variavel_f(mdl: Model, data: dataCS) -> Model:
+    mdl.add_constraints(
+        mdl.f[i,j,0] == 0
+        for j in range(data.r)
+        for i in range(data.nitems)
     )
     return mdl
 
@@ -213,6 +238,9 @@ def build_model(data: dataCS, capacity: float) -> Model:
     mdl = constraint_split_time(mdl, data)
     mdl = constraint_split_max(mdl, data)
     mdl = constraint_simmetry_machine(mdl, data)
+    mdl = constraint_symmetry_breaking(mdl, data)
+    mdl = constraint_variavel_w(mdl, data)
+    mdl = constraint_variavel_f(mdl, data)
     mdl.add_kpi(total_setup_cost(mdl, data), "total_setup_cost")
     mdl.add_kpi(total_estoque_cost(mdl, data), "total_estoque_cost")
     mdl.add_kpi(used_capacity(mdl, data), "used_capacity")
