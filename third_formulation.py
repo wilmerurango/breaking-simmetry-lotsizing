@@ -139,8 +139,8 @@ def constraint_split_max(mdl: Model, data: dataCS) -> Model:
 
 def constraint_symmetry_breaking(mdl: Model, data: dataCS) -> Model:
     mdl.add_constraints(
-        mdl.z[i,j-1,0] <= mdl.z[i,j,0]
-        for i in range(data.nitems)
+        mdl.w[0,j-1,t] + mdl.z[0,j-1,t] <= mdl.w[0,j,t] + mdl.z[0,j,t]
+        for t in range(data.nperiodos)
         for j in range(1,data.r)
     )
     return mdl
