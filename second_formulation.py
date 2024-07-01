@@ -142,7 +142,7 @@ def constraint_symmetry_breaking(mdl: Model, data: dataCS) -> Model:
         mdl.sum(mdl.w[u, j, t] for u in range(i)) >= mdl.z[i,j,t]
         for i in range(1,data.nitems)
         for j in range(data.r)
-        for t in range(data.nperiodos)
+        for t in range(1,data.nperiodos)
     )
     return mdl
 
