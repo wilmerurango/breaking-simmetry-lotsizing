@@ -138,8 +138,8 @@ def constraint_split_max(mdl: Model, data: dataCS) -> Model:
 
 def constraint_simmetry_machine(mdl: Model, data: dataCS) -> Model:
     mdl.add_constraints(
-        mdl.sum(2^(i-k)*(mdl.w[k, j-1, 1] + mdl.z[k,j-1,1]) for k in range(i+1)) <= 
-        mdl.sum(2^(i-k)*(mdl.w[k, j, 1] + mdl.z[k,j,1]) for k in range(i+1))
+        mdl.sum(2^(i-k)*(mdl.z[k,j-1,0]) for k in range(i+1)) <= 
+        mdl.sum(2^(i-k)*(mdl.z[k,j,0]) for k in range(i+1))
         for i in range(data.nitems)
         for j in range(1,data.r)
     )
@@ -192,7 +192,7 @@ def total_estoque_cost(mdl, data):
 
 def used_capacity(mdl, data):
     return sum(
-        data.st[i] * (mdl.z[i, j, t]+mdl.w[i, j, t])
+        data.st[i] * mdl.z[i, j, t]+ mdl.l[i, j, t] + mdl.f[i,j,t]
         for i in range(data.nitems)
         for j in range(data.r)
         for t in range(data.nperiodos)
