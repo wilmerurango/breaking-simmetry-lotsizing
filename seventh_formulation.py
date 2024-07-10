@@ -138,8 +138,8 @@ def constraint_split_max(mdl: Model, data: dataCS) -> Model:
 
 def constraint_simmetry_machine(mdl: Model, data: dataCS) -> Model:
     mdl.add_constraints(
-        mdl.sum(2^(i-k)*(mdl.z[k,j-1,0]) for k in range(i+1)) <= 
-        mdl.sum(2^(i-k)*(mdl.z[k,j,0]) for k in range(i+1))
+        mdl.sum(2**(i-k)*(mdl.z[k,j-1,0]) for k in range(i+1)) <= 
+        mdl.sum(2**(i-k)*(mdl.z[k,j,0]) for k in range(i+1))
         for i in range(data.nitems)
         for j in range(1,data.r)
     )
