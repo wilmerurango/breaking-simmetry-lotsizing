@@ -43,7 +43,7 @@ class LerDados:
         inicio, fim = fim, fim + self.nitems
         self.vt = np.array(df.iloc[inicio:fim, 0].astype(float), dtype=int)
         self.hc = context.custo_estoque * np.array(df.iloc[inicio:fim, 1].astype(float), dtype=float)
-        self.hc = self.hc * 10
+        self.hc = self.hc * 100
         self.st = np.array(df.iloc[inicio:fim, 2].astype(float), dtype=int)
         self.sc = context.custo_setup * np.array(df.iloc[inicio:fim, 3].astype(float), dtype=int)
         inicio, fim = fim, fim + self.nperiodos
