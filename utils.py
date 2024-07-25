@@ -228,7 +228,7 @@ def running_all_instance_with_chosen_capacity(
 
     # Atualizar a coluna "capacity" na tabela caps
     for key in caps:
-        caps[key]['capacity'] = caps[key]['capacity'] * 0.90
+        caps[key]['capacity'] = caps[key]['capacity'] * 0.80
         
     print(caps)
 
