@@ -45,6 +45,7 @@ class LerDados:
         self.hc = context.custo_estoque * np.array(df.iloc[inicio:fim, 1].astype(float), dtype=float)
         self.st = np.array(df.iloc[inicio:fim, 2].astype(float), dtype=int)
         self.sc = context.custo_setup * np.array(df.iloc[inicio:fim, 3].astype(float), dtype=int)
+        self.sc = self.sc * 0
         inicio, fim = fim, fim + self.nperiodos
         if self.nitems <= 15:
             self._d_no_sorted = np.array(df.iloc[inicio:fim, :].astype(float), dtype=int).T
