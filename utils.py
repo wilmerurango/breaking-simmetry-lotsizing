@@ -226,6 +226,11 @@ def running_all_instance_with_chosen_capacity(
         pdf_capacidades, index=["Instance", "nmaquinas"], aggfunc={"capacity": "mean"}
     ).T.to_dict()
 
+    # Atualizar a coluna "capacity" na tabela caps
+    for key in caps:
+        caps[key]['capacity'] = caps[key]['capacity'] * 0.95
+    print(caps)
+
     if not MPI_BOOL:        
         for dataset in constants.INSTANCES:
             for nmaq in constants.MAQUINAS:
